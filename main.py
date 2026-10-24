@@ -71,6 +71,37 @@ def cmd_validate(_args) -> None:
     prep.main()
 
 
+def cmd_optimize(args) -> None:
+    from backtest.optimizer import IN_SAMPLE, OUT_SAMPLE, grid_search, pretty_params
+
+    if args.strategy not in STRATEGY_REGISTRY:
+        raise SystemExit(f"未知策略 {args.strategy!r},可选: {list(STRATEGY_REGISTRY)}")
+    if args.stock not in STOCK_POOL:
+        raise SystemExit(f"股票代码 {args.stock!r} 不在固定股票池,可选: {list(STOCK_POOL)}")
+
+    grid: dict[str, list] = {}
+    for item in args.param_grid or []:
+        if "=" not in item:
+            raise SystemExit(f"--param-grid 格式应为 key=v1,v2,...,得到: {item}")
+        k, vals = item.split("=", 1)
+        grid[k] = [int(v) if v.isdigit() else float(v) for v in vals.split(",")]
+
+    df, best = grid_search(args.strategy, args.stock, grid)
+    print(f"\n=== 网格寻优 {STOCK_POOL[args.stock]} ({args.stock}) | {args.strategy} | {len(df)} 组合 ===")
+    print(f"样本内: {IN_SAMPLE[0]} ~ {IN_SAMPLE[1]}   样本外: {OUT_SAMPLE[0]} ~ {OUT_SAMPLE[1]}")
+    print(f"选优口径: 样本外年化收益最高(任务书附录),并列取夏普高者\n")
+    cols = ["rank", "params", "in_annual_return", "in_max_drawdown", "out_annual_return",
+            "out_max_drawdown", "out_sharpe", "out_win_rate"]
+    show = df[cols].copy()
+    show["params"] = show["params"].apply(pretty_params)
+    for c in cols[2:]:
+        show[c] = show[c].map(lambda x: f"{x:.2%}" if "return" in c or "drawdown" in c or "rate" in c else f"{x:.3f}")
+    print(show.to_string(index=False))
+    print(f"\n最优组合: {pretty_params(best['params'])}  "
+          f"(样本外年化 {best['out_annual_return']:+.2%}, 夏普 {best['out_sharpe']:.3f})")
+    print("对比结果已追加至 records/对比结果.csv;实验记录见 records/experiments.csv")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="A股量化回测系统")
     parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
@@ -86,6 +117,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_val = sub.add_parser("validate", help="数据校验与清洗,产出校验报告与 cleaned 数据")
     p_val.set_defaults(func=cmd_validate)
+
+    p_opt = sub.add_parser("optimize", help="网格寻优(样本内/外切分,输出最优参数组)")
+    p_opt.add_argument("--strategy", required=True, help=f"策略名: {list(STRATEGY_REGISTRY)}")
+    p_opt.add_argument("--stock", required=True, help=f"股票代码: {list(STOCK_POOL)}")
+    p_opt.add_argument("--param-grid", action="append", help="参数网格 key=v1,v2,...,可重复")
+    p_opt.set_defaults(func=cmd_optimize)
 
     return parser
 
