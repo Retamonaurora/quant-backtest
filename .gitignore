@@ -5,6 +5,7 @@ __pycache__/
 
 # 数据缓存(原始/清洗/校验报告需保留并纳入提交,仅排除缓存)
 data/cache/
+output/
 *.log
 
 # IDE

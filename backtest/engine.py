@@ -74,47 +74,48 @@ def run_backtest(
     nav_rows: list[tuple[pd.Timestamp, float]] = []
     trade_rows: list[dict] = []
 
-    for date, row in df.iterrows():
+    for row, tgt in zip(df.itertuples(), target.to_numpy()):
+        date = row.Index
         # ---- 1. 开盘撮合昨日信号 ----
         if pending is not None:
             desired, pending = pending, None
-            if row["tradable"] == 1:
-                up, down = limit_up_down(row["preclose"])
-                at_limit = (row["open"] >= up - EPS) or (row["open"] <= down + EPS)
+            if row.tradable == 1:
+                up, down = limit_up_down(row.preclose)
+                at_limit = (row.open >= up - EPS) or (row.open <= down + EPS)
                 if not at_limit:
                     if desired == 1 and shares == 0:
-                        lots = math.floor(cash / (row["open"] * cfg.lot_size) + EPS)
+                        lots = math.floor(cash / (row.open * cfg.lot_size) + EPS)
                         n = lots * cfg.lot_size
                         while n > 0:
-                            cost = n * row["open"]
+                            cost = n * row.open
                             comm = max(cost * cfg.commission_rate, cfg.min_commission)
                             if cost + comm <= cash + EPS:
                                 break
                             n -= cfg.lot_size
                         if n > 0:
-                            cost = round(n * row["open"], 2)
-                            comm = round(max(n * row["open"] * cfg.commission_rate, cfg.min_commission), 2)
+                            cost = round(n * row.open, 2)
+                            comm = round(max(n * row.open * cfg.commission_rate, cfg.min_commission), 2)
                             cash = round(cash - cost - comm, 2)
                             shares, last_buy_date, open_cost = n, date, cost + comm
-                            trade_rows.append(dict(date=date, side="BUY", price=row["open"], shares=n,
+                            trade_rows.append(dict(date=date, side="BUY", price=row.open, shares=n,
                                                    commission=comm, stamp_tax=0.0, cash_after=cash, pnl=None))
                     elif desired == 0 and shares > 0:
                         # T+1 防御性校验:买入当日不允许卖出
                         if last_buy_date is None or date > last_buy_date:
-                            proceeds = shares * row["open"]
+                            proceeds = shares * row.open
                             comm = round(max(proceeds * cfg.commission_rate, cfg.min_commission), 2)
                             stamp = round(proceeds * cfg.stamp_tax_rate, 2)
                             net = round(proceeds - comm - stamp, 2)
                             pnl = round(net - open_cost, 2)
                             cash = round(cash + net, 2)
-                            trade_rows.append(dict(date=date, side="SELL", price=row["open"], shares=shares,
+                            trade_rows.append(dict(date=date, side="SELL", price=row.open, shares=shares,
                                                    commission=comm, stamp_tax=stamp, cash_after=cash, pnl=pnl))
                             shares, last_buy_date, open_cost = 0, None, 0.0
                     # desired 与持仓一致时不动作(持有/空仓)
 
         # ---- 2. 收盘:记净值,读今日信号(明日开盘执行) ----
-        nav_rows.append((date, round(cash + shares * row["close"], 2)))
-        pending = int(target.loc[date])
+        nav_rows.append((date, round(cash + shares * row.close, 2)))
+        pending = int(tgt)
 
     nav = pd.Series({d: v for d, v in nav_rows}, name="nav")
     trades = pd.DataFrame(trade_rows)
