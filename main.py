@@ -19,6 +19,7 @@ from backtest.loader import BENCHMARK_CODE, BENCHMARK_NAME, STOCK_POOL, load_cle
 from report.render import plot_nav
 from strategies.base import STRATEGY_REGISTRY
 import strategies.meanrev  # noqa: F401  触发注册
+import strategies.multifactor  # noqa: F401  触发注册
 import strategies.trend  # noqa: F401  触发注册
 
 
