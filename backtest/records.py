@@ -31,7 +31,10 @@ COMPARISON_COLUMNS = [
 
 
 def _params_key(params: dict) -> str:
-    return json.dumps(params, ensure_ascii=False, sort_keys=True)
+    # 归一化去重键:剔除 None 与 0 值权重(如 w_sent=0 等价于未接入舆情),
+    # 保证新增默认参数后,历史实验重跑仍被识别为同一次实验而不重复落盘
+    compact = {k: v for k, v in params.items() if v is not None and v != 0}
+    return json.dumps(compact, ensure_ascii=False, sort_keys=True)
 
 
 def log_run(code: str, strategy: str, params: dict, sample: str,

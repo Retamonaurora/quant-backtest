@@ -70,9 +70,21 @@ def load_raw_benchmark() -> pd.DataFrame:
     return df
 
 
-def load_clean(code: str) -> pd.DataFrame:
-    """加载清洗后数据(data/cleaned/,prepare_data.py 产出),回测引擎的输入。"""
+def load_clean(code: str, sentiment: str | None = None) -> pd.DataFrame:
+    """加载清洗后数据(data/cleaned/,prepare_data.py 产出),回测引擎的输入。
+
+    sentiment: 舆情数据源("official"/"mock"),非 None 时附加 sentiment 列
+    (按交易日对齐、前向填充、首日前 0 中性,见 backtest/sentiment.py);
+    数据源不可用时抛 ValueError,避免静默回退到无舆情回测。
+    """
     path = CLEANED_DIR / f"{code}_{STOCK_POOL[code]}.csv"
     df = pd.read_csv(path, parse_dates=["date"]).set_index("date")
     df["tradable"] = df["tradable"].astype(int)
+    if sentiment is not None:
+        from backtest.sentiment import align_sentiment, load_sentiment
+
+        score = load_sentiment(code, source=sentiment)
+        if score is None:
+            raise ValueError(f"舆情数据源 {sentiment!r} 中没有 {code} 的可用数据")
+        df["sentiment"] = align_sentiment(score, df.index)
     return df

@@ -30,7 +30,15 @@ GRIDS = {
     "trend": {"fast": [5, 10, 15, 20], "slow": [20, 30, 40, 60]},
     "meanrev": {"window": [15, 20, 25], "num_std": [1.5, 2.0, 2.5]},
     "multifactor": {"mom_window": [10, 20], "vol_window": [10, 20], "buy_th": [0.3, 0.5]},
+    # 舆情三因子:multifactor_sent 是别名,策略仍为 multifactor,行情附加舆情列
+    "multifactor_sent": {"mom_window": [20], "vol_window": [20], "buy_th": [0.3, 0.5],
+                         "w_mom": [0.4], "w_vol": [0.4], "w_sent": [0.2, 0.4]},
 }
+
+# 别名 -> (真实策略名, 舆情数据源, 是否落正式实验记录)
+# mock 为合成数据,实验不落正式 records(避免污染);官方数据到位后改为
+# "multifactor_sent": ("multifactor", "official", True) 再跑真实舆情实验
+ALIASES = {"multifactor_sent": ("multifactor", "mock", False)}
 
 
 def main() -> None:
@@ -42,13 +50,15 @@ def main() -> None:
     strategy_names = args.strategies.split(",") if args.strategies else list(GRIDS)
     stock_codes = args.stocks.split(",") if args.stocks else list(STOCK_POOL)
     for s in strategy_names:
-        if s not in STRATEGY_REGISTRY:
-            raise SystemExit(f"未知策略 {s!r},可用: {list(STRATEGY_REGISTRY)}")
+        if s not in GRIDS:
+            raise SystemExit(f"未知策略 {s!r},可用: {list(GRIDS)}")
 
     for s in strategy_names:
+        real_name, sentiment, log = ALIASES.get(s, (s, None, True))
         for code in stock_codes:
-            df, best = grid_search(s, code, GRIDS[s])
-            print(f"[{s}] {STOCK_POOL[code]}({code}): {len(df)} 组合 | 最优 {pretty_params(best['params'])}"
+            df, best = grid_search(real_name, code, GRIDS[s], log=log, sentiment=sentiment)
+            tag = f"[{s}]" if sentiment is None else f"[{s} @{sentiment}]"
+            print(f"{tag} {STOCK_POOL[code]}({code}): {len(df)} 组合 | 最优 {pretty_params(best['params'])}"
                   f" | 样本外年化 {best['out_annual_return']:+.2%} 夏普 {best['out_sharpe']:.3f}")
         print(f"累计真实变化实验: {count_real_experiments()}")
 

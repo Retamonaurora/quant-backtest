@@ -49,7 +49,7 @@ def cmd_backtest(args) -> None:
 
     strategy = STRATEGY_REGISTRY[args.strategy]()
     params = {**strategy.default_params, **parse_kv(args.param)}
-    data = load_clean(args.stock)
+    data = load_clean(args.stock, sentiment=args.sentiment)
     result = run_backtest(data, strategy.generate_target(data, params),
                           code=args.stock, start=args.start, end=args.end, config=BacktestConfig())
 
@@ -88,7 +88,7 @@ def cmd_optimize(args) -> None:
         k, vals = item.split("=", 1)
         grid[k] = [int(v) if v.isdigit() else float(v) for v in vals.split(",")]
 
-    df, best = grid_search(args.strategy, args.stock, grid)
+    df, best = grid_search(args.strategy, args.stock, grid, sentiment=args.sentiment)
     print(f"\n=== 网格寻优 {STOCK_POOL[args.stock]} ({args.stock}) | {args.strategy} | {len(df)} 组合 ===")
     print(f"样本内: {IN_SAMPLE[0]} ~ {IN_SAMPLE[1]}   样本外: {OUT_SAMPLE[0]} ~ {OUT_SAMPLE[1]}")
     print(f"选优口径: 样本外年化收益最高(任务书附录),并列取夏普高者\n")
@@ -115,6 +115,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_bt.add_argument("--start", default=None, help="起始日期 YYYY-MM-DD")
     p_bt.add_argument("--end", default=None, help="结束日期 YYYY-MM-DD")
     p_bt.add_argument("--param", action="append", help="策略参数 key=value,可重复")
+    p_bt.add_argument("--sentiment", default=None, help="舆情数据源 official/mock(接入三因子舆情)")
     p_bt.set_defaults(func=cmd_backtest)
 
     p_val = sub.add_parser("validate", help="数据校验与清洗,产出校验报告与 cleaned 数据")
@@ -124,6 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_opt.add_argument("--strategy", required=True, help=f"策略名: {list(STRATEGY_REGISTRY)}")
     p_opt.add_argument("--stock", required=True, help=f"股票代码: {list(STOCK_POOL)}")
     p_opt.add_argument("--param-grid", action="append", help="参数网格 key=v1,v2,...,可重复")
+    p_opt.add_argument("--sentiment", default=None, help="舆情数据源 official/mock(接入三因子舆情)")
     p_opt.set_defaults(func=cmd_optimize)
 
     return parser

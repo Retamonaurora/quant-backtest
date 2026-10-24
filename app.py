@@ -161,7 +161,7 @@ def run():
         target = strategy.generate_target(data, params)
         res = run_backtest(data, target, code=code, start=start, end=end, config=BacktestConfig())
         log_run(code, strategy_name, params, "page", str(res.nav.index[0].date()),
-                str(res.nav.index[-1].date()), res.metrics)
+                str(res.nav.index[-1].date()), {**res.metrics, "name": STOCK_POOL[code]})
         bench = load_raw_benchmark()["close"]
         title = f"{STOCK_POOL[code]} {strategy_name} {params} vs {BENCHMARK_NAME}"
         chart = base64.b64encode(nav_figure_bytes(res.nav, bench, title)).decode()

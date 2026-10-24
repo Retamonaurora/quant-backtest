@@ -1,0 +1,3 @@
+本目录为合成舆情数据,仅用于三因子舆情接口的链路测试,无信息含量主张。
+生成脚本 scripts/make_mock_sentiment.py(seed=42,与近 5 日收益弱相关 + 噪声)。
+官方舆情数据包到位后请放入 data/sentiment/official/,实验结论一律以官方数据为准。

@@ -29,10 +29,14 @@ def expand_grid(param_grid: dict[str, list]) -> list[dict]:
 
 
 def grid_search(strategy_name: str, code: str, param_grid: dict[str, list],
-                log: bool = True) -> tuple[pd.DataFrame, dict]:
-    """网格寻优。返回 (对比结果 DataFrame, 最优组合 dict)。"""
+                log: bool = True, sentiment: str | None = None) -> tuple[pd.DataFrame, dict]:
+    """网格寻优。返回 (对比结果 DataFrame, 最优组合 dict)。
+
+    sentiment: 舆情数据源("official"/"mock"),非 None 时以三因子模式回测
+    (行情经 load_clean(sentiment=...) 附加 sentiment 列,策略需 w_sent>0 的组合)。
+    """
     strategy = STRATEGY_REGISTRY[strategy_name]()
-    data = load_clean(code)
+    data = load_clean(code, sentiment=sentiment)
     rows: list[dict] = []
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
