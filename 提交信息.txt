@@ -12,10 +12,14 @@
    前复权日线(2019-01-01 ~ 2024-12-31,股票池 10 只 + 沪深300),下载脚本 scripts/download_data.py,
    来源说明见 data/raw/baostock/来源说明.txt;官方数据包到位后放入 data/raw/official/
    并以官方数据为准(切换仅需修改 backtest/loader.py 的解析部分)。
-2. 校验项(七项,backtest/validate.py):日期重复、交易日历缺口、日历外脏数据、OHLC 逻辑、
-   涨跌幅越界(>±10.05% 疑似复权错误)、pctChg 与价格推算一致性、成交量异常。
+2. 数据扩充:在任务书要求区间之外,数据已扩充下载至最新交易日(2026-10-23,共 1892 个交易日),
+   仅用于延展分析;网格寻优、实验记录与 strategy.json 均固定在任务书区间(2019~2024),
+   经逐位复验不受扩充影响。
+3. 校验项(七项,backtest/validate.py):日期重复、交易日历缺口、日历外脏数据、OHLC 逻辑、
+   涨跌幅越界(|pctChg|>10.5%,阈值考虑涨停日取整毛边,实测涨停日可达 10.07%)、
+   pctChg 与价格推算一致性、成交量异常。
    校验结论与明细见 data/report/validation_report.md 与 validation_issues.csv。
-3. 清洗口径(backtest/clean.py):停牌/缺口日 OHLC 冻结为昨收、成交量 0、tradable=0;
+4. 清洗口径(backtest/clean.py):停牌/缺口日 OHLC 冻结为昨收、成交量 0、tradable=0;
    交易日报价异常以昨收替代并禁交易;涨跌幅越界仅标记不改价。清洗后数据见 data/cleaned/。
 
 二、最优策略及样本内外指标(strategy/strategy.json)

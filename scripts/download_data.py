@@ -11,13 +11,16 @@
 用法:uv run python scripts/download_data.py
 """
 
+from datetime import datetime
 from pathlib import Path
 
 import baostock as bs
 import pandas as pd
 
 RAW = Path(__file__).resolve().parents[1] / "data" / "raw" / "baostock"
-START, END = "2019-01-01", "2024-12-31"
+# 起点 = 任务书规定区间;终点 = 尽可能最新(运行当日,实际以数据源最后一个交易日为准)。
+# 注意:任务书实验窗口固定 2019-2024(见 backtest/optimizer.py),扩充部分仅用于延展分析。
+START, END = "2019-01-01", datetime.now().strftime("%Y-%m-%d")
 
 # 任务书固定股票池(不得更改);BaoStock 代码带交易所前缀
 STOCKS = {

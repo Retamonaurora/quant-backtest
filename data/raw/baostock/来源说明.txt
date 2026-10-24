@@ -1,4 +1,4 @@
 本目录数据为开发占位数据,自行补充下载,来源:BaoStock(baostock.com)。
-下载脚本:scripts/download_data.py;区间:2019-01-01 ~ 2024-12-31;个股为前复权(adjustflag=2)。
+下载脚本:scripts/download_data.py;区间:2019-01-01 ~ 2026-10-24;个股为前复权(adjustflag=2)。
 本机网络下 akshare 东财接口不可用,故采用任务书列明的备选源 BaoStock。
 回测一律以官方数据包(data/raw/official/)为准,本目录仅用于开发与交叉校验。

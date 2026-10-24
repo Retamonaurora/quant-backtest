@@ -6,8 +6,9 @@
   2. missing_day       交易日历中存在但数据缺失(疑似数据缺口,区别于停牌)
   3. extra_day         数据中存在但不在交易日历中(疑似日历外脏数据)
   4. ohlc_invalid      OHLC 逻辑错误(高低点矛盾、价格<=0、交易日报价缺失)
-  5. limit_breach      单日涨跌幅 |pctchg| > 10.05%(主板涨跌停 10% + 舍入容差),
-                       正常行情不应出现,出现即疑似复权错误或脏数据
+  5. limit_breach      交易日 |pctChg| > 10.5%(疑似复权错误)。主板涨跌停 10%,因前收盘价
+                       按分取整,涨停日 |pctChg| 合理上限约 10.1%(实测 ≤10.07%),阈值取 10.5%
+                       既不误报真实涨跌停,又能捕获复权错误造成的异常跳变
   6. pctchg_mismatch   pctchg 字段与 close/preclose 推算值偏差 > 0.05 个百分点
                        (字段内部不一致,疑似复权口径混乱)
   7. volume_anomaly    交易日报量为 0/负,或任意日报量为负(停牌标志与行情矛盾)
@@ -18,8 +19,8 @@ import pandas as pd
 
 from backtest.loader import PRICE_COLS, STOCK_POOL, load_calendar, load_raw
 
-# 主板单日涨跌幅限制 10%,留 0.05pp 舍入容差
-LIMIT_PCT = 10.05
+# 涨跌幅越界阈值:涨停日经前收取整放大后实测可达 ~10.07%,取 10.5% 为疑似复权错误判定线
+LIMIT_BREACH_PCT = 10.5
 PCTCHG_TOL = 0.05
 
 
@@ -56,10 +57,11 @@ def validate_stock(code: str, df: pd.DataFrame, calendar: pd.DatetimeIndex) -> l
     for d, row in df[bad_ohlc.fillna(False)].iterrows():
         add(d, "ohlc_invalid", f"OHLC 异常: O={row['open']} H={row['high']} L={row['low']} C={row['close']}")
 
-    # 5. 涨跌幅越界(疑似复权错误)
-    breach = trading & df["pctchg"].abs().gt(LIMIT_PCT)
+    # 5. 涨跌幅越界(疑似复权错误)。注意:前复权价格是缩放后的浮点值,不再是 0.01 元
+    #    对齐的真实报价,不能用取整涨跌停价直接比对;以 pctChg 超阈值判定(见模块文档)。
+    breach = trading & df["pctchg"].abs().gt(LIMIT_BREACH_PCT)
     for d, pct in df.loc[breach, "pctchg"].items():
-        add(d, "limit_breach", f"涨跌幅 {pct:.2f}% 超过 ±{LIMIT_PCT}%,疑似复权错误")
+        add(d, "limit_breach", f"涨跌幅 {pct:.2f}% 超过 ±{LIMIT_BREACH_PCT}%,疑似复权错误")
 
     # 6. pctchg 与价格推算不一致
     calc = 100 * (df["close"] / df["preclose"] - 1)
