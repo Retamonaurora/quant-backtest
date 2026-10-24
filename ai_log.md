@@ -9,3 +9,4 @@
 | 2026-10-24 | ZCode(CLI) | D3 回测引擎与指标:engine(统一撮合:信号收盘算次日开盘成交、T+1、开盘触板不成交、停牌禁交易、佣金/印花税、整手递减)+ metrics(年化/回撤/夏普/胜率);scripts/test_engine.py 六组用例 26 项断言全部 PASS(A 费用手算对账、B 涨停禁买、C 停牌、D 跌停禁卖、E 信号时序、F 真实数据独立重算) |
 | 2026-10-24 | ZCode(CLI) | D4 双均线策略与 CLI:engine 循环重构为 itertuples(26 断言复验 PASS);strategies/base 注册表 + trend 双均线;report/render 净值图 vs 沪深300(中文字体);main.py backtest/validate 子命令;600519 全区间端到端跑通(年化 +6.82%,回撤 40.39%,夏普 0.426) |
 | 2026-10-24 | ZCode(CLI) | D5 网格寻优与实验记录:backtest/records(自动落盘 experiments.csv,重复实验去重;对比结果.csv 带 run_id 追加)+ backtest/optimizer(样本内 2019-2022/样本外 2023-2024 切分,任务书附录口径按样本外年化选优);main.py optimize 子命令;修复 code 列 dtype 导致的去重失效 |
+| 2026-10-24 | ZCode(CLI) | D6 布林带均值回复:strategies/meanrev(跌破下轨买入/涨破上轨卖出,ddof=0 经典口径)+ scripts/run_experiments 批量实验脚本;trend+meanrev × 10 股全量寻优,累计 480 条真实变化实验(目标 ≥60 已超额);样本外结论符合直觉:趋势策略在工行/长电为正,均值回复在恒瑞/长电为正,万科/中免皆负 |
