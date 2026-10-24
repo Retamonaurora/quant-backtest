@@ -29,6 +29,7 @@ BENCHMARK_NAME = "沪深300"
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_DIR / "data"
+CLEANED_DIR = DATA_DIR / "cleaned"
 
 # 标准化后的列(下游统一使用)
 PRICE_COLS = ["open", "high", "low", "close"]
@@ -66,4 +67,12 @@ def load_raw_benchmark() -> pd.DataFrame:
     df = pd.read_csv(_benchmark_path(), parse_dates=["date"])
     df = df.rename(columns={"pctChg": "pctchg"})
     df = df.sort_values("date").set_index("date")
+    return df
+
+
+def load_clean(code: str) -> pd.DataFrame:
+    """加载清洗后数据(data/cleaned/,prepare_data.py 产出),回测引擎的输入。"""
+    path = CLEANED_DIR / f"{code}_{STOCK_POOL[code]}.csv"
+    df = pd.read_csv(path, parse_dates=["date"]).set_index("date")
+    df["tradable"] = df["tradable"].astype(int)
     return df

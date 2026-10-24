@@ -11,9 +11,7 @@
 
 import pandas as pd
 
-from backtest.loader import DATA_DIR, PRICE_COLS, STOCK_POOL, load_calendar, load_raw
-
-CLEANED_DIR = DATA_DIR / "cleaned"
+from backtest.loader import CLEANED_DIR, DATA_DIR, PRICE_COLS, STOCK_POOL, load_calendar, load_raw
 
 
 def clean_stock(code: str, df: pd.DataFrame, calendar: pd.DatetimeIndex) -> tuple[pd.DataFrame, list[dict]]:
