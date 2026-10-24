@@ -11,3 +11,4 @@
 | 2026-10-24 | ZCode(CLI) | D5 网格寻优与实验记录:backtest/records(自动落盘 experiments.csv,重复实验去重;对比结果.csv 带 run_id 追加)+ backtest/optimizer(样本内 2019-2022/样本外 2023-2024 切分,任务书附录口径按样本外年化选优);main.py optimize 子命令;修复 code 列 dtype 导致的去重失效 |
 | 2026-10-24 | ZCode(CLI) | D6 布林带均值回复:strategies/meanrev(跌破下轨买入/涨破上轨卖出,ddof=0 经典口径)+ scripts/run_experiments 批量实验脚本;trend+meanrev × 10 股全量寻优,累计 480 条真实变化实验(目标 ≥60 已超额);样本外结论符合直觉:趋势策略在工行/长电为正,均值回复在恒瑞/长电为正,万科/中免皆负 |
 | 2026-10-24 | ZCode(CLI) | D7 多因子打分:strategies/multifactor(动量+低波动滚动 z-score 加权合成,状态机阈值交易);× 10 股寻优后累计 640 条真实变化实验、3 策略、10 股全覆盖(要求 ≥60 条/≥6 股);样本外最优:平安 +32.48%、工行 +23.34% |
+| 2026-10-24 | ZCode(CLI) | D8 绩效报告页:app.py(策略/股票/日期/参数表单 → 四大指标卡 + 净值 vs 沪深300 内嵌图 + 成交明细,页面回测与 CLI 结果一致);render 增加内存图像输出;启动.bat 一键启动(自动 uv sync);demo/ 三张关键截图(三策略各一);修复模板渲染与暗色模式背景 |
