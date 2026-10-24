@@ -19,6 +19,40 @@ uv run python main.py backtest --strategy trend --stock 600519 --start 2019-01-0
 
 无 uv 备选:`pip install -r requirements.txt`(Python ≥ 3.10),再 `python app.py` 或 `python main.py ...`。
 
+## 使用指南
+
+### 1. 启动绩效报告页(网页界面,推荐)
+
+```bash
+启动.bat        # 双击即可;等价于 uv sync(缺环境时)+ python app.py + 自动打开浏览器
+```
+
+启动后浏览器访问 [http://127.0.0.1:5000](http://127.0.0.1:5000)(`启动.bat` 会自动弹出),界面操作:
+
+1. 表单中选择:策略(trend / meanrev / multifactor)、股票(10 只固定池)、起止日期、可选参数(格式 `key=value`,逗号分隔,如 `fast=5, slow=20`)
+2. 点击 **运行回测** → 页面展示:总收益/年化/最大回撤/夏普/胜率五张指标卡、净值 vs 沪深300 曲线(含回撤子图)、逐笔成交明细(价格/股数/佣金/印花税/回合盈亏)
+3. **每次页面回测都会自动落一条实验记录**到 `records/experiments.csv`(重复组合不重复落盘),与命令行实验同等留痕
+4. 停止服务:在窗口按 `Ctrl+C`;端口被占用时先释放 5000 端口(见"常见问题")
+
+### 2. 测试(正确性验证)
+
+```bash
+uv run python scripts/test_engine.py   # 回测引擎 26 项手工对账断言(费用/T+1/涨跌停/停牌/信号时序)
+uv run python main.py validate         # 数据校验与清洗流水线,产出校验报告
+```
+
+引擎测试的期望值均为人工推算写死(如 99900 股买入佣金 249.75 元、跌停禁卖后次日成交等),全部 PASS 说明撮合规则与任务书逐条一致。完整复现流程:干净目录解压/克隆后,依次执行"快速开始"三条命令与上表命令,约 5~10 分钟。
+
+### 3. 命令行(批处理与寻优)
+
+| 命令 | 作用 |
+|------|------|
+| `uv run python main.py validate` | 数据校验与清洗,产出校验报告与 cleaned 数据 |
+| `uv run python main.py backtest --strategy <trend/meanrev/multifactor> --stock <代码> --start ... --end ... [--param fast=5]` | 单次回测,输出指标与净值图 |
+| `uv run python main.py optimize --strategy trend --stock 600519 --param-grid fast=5,10 --param-grid slow=20,30` | 网格寻优(样本内/外切分) |
+| `uv run python scripts/run_experiments.py` | 批量实验:全策略 × 10 股 × 网格 |
+| `uv run python scripts/finalize.py` | 由实验记录生成 strategy/strategy.json |
+
 ## 成果与任务书要求对照
 
 | 任务书要求 | 实现 | 自验方式 |
