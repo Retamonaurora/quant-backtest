@@ -1,0 +1,40 @@
+{
+  "strategy": "multifactor",
+  "strategy_description": "多因子打分:动量+低波动加权合成,高分持股、低分清仓",
+  "stock": "601318",
+  "stock_name": "中国平安",
+  "params": {
+    "mom_window": 20,
+    "vol_window": 20,
+    "z_window": 60,
+    "buy_th": 0.3,
+    "sell_th": -0.3,
+    "w_mom": 0.5
+  },
+  "in_sample": {
+    "start": "2019-01-01",
+    "end": "2022-12-31",
+    "days": 972,
+    "total_return": -0.05857575999999998,
+    "annual_return": -0.01552743893995523,
+    "max_drawdown": 0.40487859100108303,
+    "sharpe": 0.012064481599994865,
+    "win_rate": 0.42857142857142855,
+    "round_trips": 14
+  },
+  "out_sample": {
+    "start": "2023-01-01",
+    "end": "2024-12-31",
+    "days": 484,
+    "total_return": 0.7164130200000001,
+    "annual_return": 0.32482482656627565,
+    "max_drawdown": 0.2229202820592744,
+    "sharpe": 1.3495728570198287,
+    "win_rate": 0.7,
+    "round_trips": 10
+  },
+  "selection_rule": "网格寻优遍历全部参数组合,按任务书附录口径选样本外表现最好的组合(样本外年化收益最高,并列取夏普更高者);全局选优同口径。",
+  "data_source": "官方数据包未到位期间采用 BaoStock 前复权日线(2019-01-01~2024-12-31),来源注明见 data/raw/baostock/来源说明.txt;官方数据到位后以官方数据为准并重新验证。",
+  "generated_at": "2026-10-24 17:04:08",
+  "engine_rules": "信号当日收盘计算、次日开盘价成交;T+1;开盘触涨跌停不成交;停牌不可交易;佣金万2.5(最低5元)+ 卖出印花税万5;初始资金 100 万;整手交易。"
+}
