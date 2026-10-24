@@ -11,6 +11,10 @@ data/cache/
 .idea/
 .vscode/
 
+# 本地参考文件(任务书与开发计划,不入库)
+PLAN.md
+任务书*
+
 # 系统文件
 Thumbs.db
 .DS_Store
