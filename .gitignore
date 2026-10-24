@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 数据缓存(原始/清洗/校验报告需保留并纳入提交,仅排除缓存)
+data/cache/
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# 系统文件
+Thumbs.db
+.DS_Store
