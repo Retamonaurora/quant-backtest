@@ -111,8 +111,9 @@ report/render.py        净值 vs 沪深300 图表
 data/                   raw 原始 | cleaned 清洗后 | report 校验报告
 records/                experiments.csv 实验记录 | 对比结果.csv(均自动导出)
 strategy/strategy.json  自研最优配置(含样本内外指标)
-scripts/                download_data | prepare_data | test_engine | run_experiments | finalize
+scripts/                download_data | prepare_data | test_engine | run_experiments | finalize | package
 demo/                   关键截图(三策略回测各一)
+release/                提交压缩包归档(周宏博-A股量化回测系统.zip,重打:uv run python scripts/package.py --name 周宏博)
 ```
 
 ## 常见问题
