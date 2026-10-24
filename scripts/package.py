@@ -15,7 +15,7 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
 
-EXCLUDE_DIRS = {".venv", "output", "__pycache__", ".pytest_cache", ".idea", ".vscode"}
+EXCLUDE_DIRS = {".venv", "output", "__pycache__", ".pytest_cache", ".idea", ".vscode", "release"}
 EXCLUDE_FILES = {"PLAN.md"}
 EXCLUDE_SUFFIXES = (".pyc", ".log")
 
